@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-mysql-api
+  namespace: fastapi-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-mysql-api
+  template:
+    metadata:
+      labels:
+        app: fastapi-mysql-api
+    spec:
+      containers:
+      - name: fastapi-mysql-api
+        image: docker.io/library/fastapi-mysql-api
+        imagePullPolicy: Never
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 80
+        env:
+          - name: MYSQL_HOST
+            value: "mysql.mysql.svc.cluster.local"
+          - name: MYSQL_USER
+            value: "cdc_user"
+          - name: MYSQL_PASSWORD
+            value: "cdc_password"
+          - name: MYSQL_DATABASE
+            value: "cdc_db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-mysql-api
+  namespace: fastapi-app
+spec:
+  selector:
+    app: fastapi-mysql-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
