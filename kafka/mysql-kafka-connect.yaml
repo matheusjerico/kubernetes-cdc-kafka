@@ -1,0 +1,20 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: mysql-kafka-connect
+  namespace: kafka
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+spec:
+  version: 3.8.0
+  replicas: 1
+  bootstrapServers: kakfa-data-platform-kafka-bootstrap.kafka.svc.cluster.local:9092
+  image: docker.io/library/kafka-connect-mysql:v0.0.1
+  config:
+    group.id: "mysql-kafka-connect-cluster"
+    offset.storage.topic: "mysql-kafka-connect-offsets"
+    config.storage.topic: "mysql-kafka-connect-configs"
+    status.storage.topic: "mysql-kafka-connect-status"
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
