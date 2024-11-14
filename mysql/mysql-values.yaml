@@ -1,0 +1,47 @@
+image:
+  registry: docker.io
+  repository: bitnami/mysql
+  tag: 8.0-debian-12
+
+auth:
+  rootPassword: "root_password"
+  database: "cdc_db"
+  username: "cdc_user"
+  password: "cdc_password"
+
+configuration: |-
+    [mysqld]
+    authentication_policy='{{- .Values.auth.authenticationPolicy | default "* ,," }}'
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/opt/bitnami/mysql
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    port={{ .Values.primary.containerPorts.mysql }}
+    mysqlx={{ ternary 1 0 .Values.primary.enableMySQLX }}
+    mysqlx_port={{ .Values.primary.containerPorts.mysqlx }}
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    datadir=/bitnami/mysql/data
+    tmpdir=/opt/bitnami/mysql/tmp
+    max_allowed_packet=16M
+    bind-address=*
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+    log-error=/opt/bitnami/mysql/logs/mysqld.log
+    character-set-server=UTF8
+    slow_query_log=0
+    long_query_time=10.0
+    server-id=1                           # Set a unique server ID
+    log_bin=/var/log/mysql/mysql-bin.log  # Enable binary logging
+    binlog_format=ROW                     # Set binary log format to ROW
+    binlog_row_image=full                 # Log full row images for CDC
+    binlog_expire_logs_seconds=864000     # set expiration time
+
+    [client]
+    port={{ .Values.primary.containerPorts.mysql }}
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    default-character-set=UTF8
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+
+    [manager]
+    port={{ .Values.primary.containerPorts.mysql }}
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
